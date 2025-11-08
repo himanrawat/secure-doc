@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - Secure Document Platform</title>
+  <link rel="stylesheet" href="/css/auth.css">
+</head>
+<body>
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="auth-header">
+        <h1>🔒 Create Account</h1>
+        <p>Join the secure document platform</p>
+      </div>
+      
+      <form id="register-form" class="auth-form">
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <input type="text" id="name" required class="form-input" placeholder="John Doe">
+        </div>
+        
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" required class="form-input" placeholder="you@example.com">
+        </div>
+        
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" required minlength="8" class="form-input" placeholder="••••••••">
+          <small class="form-help">Minimum 8 characters</small>
+        </div>
+        
+        <div class="form-group">
+          <label for="confirm-password">Confirm Password</label>
+          <input type="password" id="confirm-password" required class="form-input" placeholder="••••••••">
+        </div>
+        
+        <div class="form-actions">
+          <button type="submit" class="btn-primary btn-full">Register</button>
+        </div>
+        
+        <div class="form-footer">
+          <p>Already have an account? <a href="/login.html">Login</a></p>
+          <p><a href="/">Back to Home</a></p>
+        </div>
+      </form>
+      
+      <div id="error-message" class="error-message hidden"></div>
+      <div id="success-message" class="success-message hidden"></div>
+    </div>
+  </div>
+  
+  <script>
+    const form = document.getElementById('register-form');
+    const errorEl = document.getElementById('error-message');
+    const successEl = document.getElementById('success-message');
+    
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirm-password').value;
+      
+      errorEl.classList.add('hidden');
+      successEl.classList.add('hidden');
+      
+      if (password !== confirmPassword) {
+        errorEl.textContent = 'Passwords do not match';
+        errorEl.classList.remove('hidden');
+        return;
+      }
+      
+      try {
+        const response = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, password })
+        });
+        
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || 'Registration failed');
+        }
+        
+        const data = await response.json();
+        localStorage.setItem('authToken', data.token);
+        
+        successEl.textContent = 'Registration successful! Redirecting...';
+        successEl.classList.remove('hidden');
+        
+        setTimeout(() => {
+          window.location.href = '/dashboard.html';
+        }, 1500);
+        
+      } catch (err) {
+        errorEl.textContent = err.message;
+        errorEl.classList.remove('hidden');
+      }
+    });
+  </script>
+</body>
+</html>

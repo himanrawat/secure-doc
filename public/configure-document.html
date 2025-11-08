@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Configure Document Security - Secure Doc Viewer</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <style>
+    .config-container {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 30px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+
+    .config-header {
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    .config-header h1 {
+      font-size: 28px;
+      color: #1976d2;
+      margin-bottom: 10px;
+    }
+
+    .document-info {
+      background: #f5f5f5;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+    }
+
+    .document-info p {
+      margin: 5px 0;
+      color: #555;
+    }
+
+    .config-section {
+      margin-bottom: 30px;
+      padding: 20px;
+      background: #fafafa;
+      border-radius: 8px;
+      border-left: 4px solid #1976d2;
+    }
+
+    .config-section h3 {
+      color: #333;
+      margin-bottom: 15px;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .config-section h3::before {
+      content: '🔒';
+      font-size: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="number"],
+    .form-group input[type="date"],
+    .form-group input[type="time"],
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: border-color 0.3s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #1976d2;
+    }
+
+    .form-group small {
+      display: block;
+      margin-top: 5px;
+      color: #666;
+      font-size: 12px;
+    }
+
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+
+    .checkbox-group label {
+      margin: 0;
+      cursor: pointer;
+      font-weight: normal;
+    }
+
+    .day-selector {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .day-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 8px 12px;
+      background: white;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .day-checkbox:hover {
+      border-color: #1976d2;
+    }
+
+    .day-checkbox input:checked + label {
+      font-weight: bold;
+      color: #1976d2;
+    }
+
+    .time-range {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 15px;
+      justify-content: flex-end;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 2px solid #e0e0e0;
+    }
+
+    .btn {
+      padding: 12px 30px;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-primary {
+      background: #1976d2;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #1565c0;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
+    }
+
+    .btn-secondary {
+      background: #757575;
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background: #616161;
+    }
+
+    .share-link-container {
+      display: none;
+      margin-top: 30px;
+      padding: 20px;
+      background: #e3f2fd;
+      border-radius: 8px;
+      border: 2px solid #1976d2;
+    }
+
+    .share-link-container.active {
+      display: block;
+    }
+
+    .share-link {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .share-link input {
+      flex: 1;
+      padding: 12px;
+      border: 1px solid #1976d2;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 14px;
+    }
+
+    .btn-copy {
+      padding: 12px 24px;
+      background: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .btn-copy:hover {
+      background: #45a049;
+    }
+
+    .alert {
+      padding: 15px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+    }
+
+    .alert-success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .alert-error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #1976d2;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-brand">
+        <span class="lock-icon">🔒</span>
+        <span>Secure Doc Viewer</span>
+      </div>
+      <div class="nav-links">
+        <a href="/dashboard.html">Dashboard</a>
+        <a href="#" id="logoutBtn">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="config-container">
+    <div class="config-header">
+      <h1>Configure Document Security</h1>
+      <p>Set security policies and generate shareable link</p>
+    </div>
+
+    <div id="loadingDiv" class="loading">
+      <div class="spinner"></div>
+      <p>Loading document...</p>
+    </div>
+
+    <div id="alertDiv"></div>
+
+    <div id="configForm" style="display: none;">
+      <div class="document-info">
+        <h3>📄 Document Information</h3>
+        <p><strong>Title:</strong> <span id="docTitle"></span></p>
+        <p><strong>Filename:</strong> <span id="docFilename"></span></p>
+        <p><strong>Size:</strong> <span id="docSize"></span></p>
+        <p><strong>Uploaded:</strong> <span id="docCreated"></span></p>
+      </div>
+
+      <form id="securityConfigForm">
+        <!-- Access Control Section -->
+        <div class="config-section">
+          <h3>Access Control</h3>
+          
+          <div class="form-group">
+            <label for="maxViews">Maximum View Count</label>
+            <input type="number" id="maxViews" name="maxViews" min="-1" value="-1">
+            <small>-1 = Unlimited views. Set a specific number to limit access.</small>
+          </div>
+
+          <div class="form-group">
+            <label for="expiryDate">Expiry Date & Time</label>
+            <input type="datetime-local" id="expiryDate" name="expiryDate">
+            <small>Leave blank for no expiration</small>
+          </div>
+
+          <div class="form-group">
+            <label for="sessionTimeLimit">Session Time Limit (minutes)</label>
+            <input type="number" id="sessionTimeLimit" name="sessionTimeLimit" min="-1" value="-1">
+            <small>-1 = Unlimited. Maximum time a viewer can keep document open.</small>
+          </div>
+        </div>
+
+        <!-- Camera & Verification Section -->
+        <div class="config-section">
+          <h3>Camera & Verification</h3>
+          
+          <div class="checkbox-group">
+            <input type="checkbox" id="requireCamera" name="requireCamera" checked>
+            <label for="requireCamera">Require Camera Verification</label>
+          </div>
+
+          <div class="checkbox-group">
+            <input type="checkbox" id="requireFaceMatch" name="requireFaceMatch">
+            <label for="requireFaceMatch">Require Face Matching (Verify viewer identity)</label>
+          </div>
+
+          <small style="display: block; margin-top: 10px; color: #666;">
+            Face matching requires viewers to register their face first or match with owner's face descriptor.
+          </small>
+        </div>
+
+        <!-- Security Features Section -->
+        <div class="config-section">
+          <h3>Security Features</h3>
+          
+          <div class="form-group">
+            <label for="securityLevel">Security Level</label>
+            <select id="securityLevel" name="securityLevel">
+              <option value="LOW">Low - Basic protection</option>
+              <option value="MEDIUM" selected>Medium - Standard protection</option>
+              <option value="HIGH">High - Enhanced protection</option>
+              <option value="MAXIMUM">Maximum - All protections active</option>
+            </select>
+          </div>
+
+          <div class="checkbox-group">
+            <input type="checkbox" id="blockMultipleMonitors" name="blockMultipleMonitors">
+            <label for="blockMultipleMonitors">Block Multiple Monitors</label>
+          </div>
+
+          <div class="checkbox-group">
+            <input type="checkbox" id="blockConcurrentSessions" name="blockConcurrentSessions" checked>
+            <label for="blockConcurrentSessions">Block Concurrent Sessions</label>
+          </div>
+
+          <div class="form-group">
+            <label for="maxViolations">Maximum Violations Before Auto-Revoke</label>
+            <input type="number" id="maxViolations" name="maxViolations" min="1" value="3">
+          </div>
+        </div>
+
+        <!-- Watermark Section -->
+        <div class="config-section">
+          <h3>Watermark Settings</h3>
+          
+          <div class="checkbox-group">
+            <input type="checkbox" id="watermarkEnabled" name="watermarkEnabled" checked>
+            <label for="watermarkEnabled">Enable Visible Watermark</label>
+          </div>
+
+          <div class="form-group">
+            <label for="watermarkText">Watermark Text</label>
+            <input type="text" id="watermarkText" name="watermarkText" placeholder="e.g., CONFIDENTIAL - {viewer-email}">
+            <small>Use {viewer-email}, {viewer-ip}, {timestamp} as placeholders</small>
+          </div>
+
+          <div class="form-group">
+            <label for="watermarkPosition">Watermark Position</label>
+            <select id="watermarkPosition" name="watermarkPosition">
+              <option value="diagonal">Diagonal (Full Page)</option>
+              <option value="center">Center</option>
+              <option value="corners">Four Corners</option>
+              <option value="floating">Floating (Animated)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="watermarkOpacity">Watermark Opacity</label>
+            <input type="number" id="watermarkOpacity" name="watermarkOpacity" min="0.1" max="1" step="0.1" value="0.3">
+          </div>
+        </div>
+
+        <!-- Time-Based Access Section -->
+        <div class="config-section">
+          <h3>Time-Based Access Control</h3>
+          
+          <div class="form-group">
+            <label>Allowed Time Range (24-hour format)</label>
+            <div class="time-range">
+              <div>
+                <label for="allowedTimeStart" style="font-weight: normal; font-size: 13px;">Start Time</label>
+                <input type="time" id="allowedTimeStart" name="allowedTimeStart">
+              </div>
+              <div>
+                <label for="allowedTimeEnd" style="font-weight: normal; font-size: 13px;">End Time</label>
+                <input type="time" id="allowedTimeEnd" name="allowedTimeEnd">
+              </div>
+            </div>
+            <small>Leave blank for 24/7 access</small>
+          </div>
+
+          <div class="form-group">
+            <label>Allowed Days of Week</label>
+            <div class="day-selector">
+              <div class="day-checkbox">
+                <input type="checkbox" id="day0" name="allowedDays" value="0">
+                <label for="day0">Sun</label>
+              </div>
+              <div class="day-checkbox">
+                <input type="checkbox" id="day1" name="allowedDays" value="1">
+                <label for="day1">Mon</label>
+              </div>
+              <div class="day-checkbox">
+                <input type="checkbox" id="day2" name="allowedDays" value="2">
+                <label for="day2">Tue</label>
+              </div>
+              <div class="day-checkbox">
+                <input type="checkbox" id="day3" name="allowedDays" value="3">
+                <label for="day3">Wed</label>
+              </div>
+              <div class="day-checkbox">
+                <input type="checkbox" id="day4" name="allowedDays" value="4">
+                <label for="day4">Thu</label>
+              </div>
+              <div class="day-checkbox">
+                <input type="checkbox" id="day5" name="allowedDays" value="5">
+                <label for="day5">Fri</label>
+              </div>
+              <div class="day-checkbox">
+                <input type="checkbox" id="day6" name="allowedDays" value="6">
+                <label for="day6">Sat</label>
+              </div>
+            </div>
+            <small>Leave all unchecked for access on all days</small>
+          </div>
+        </div>
+
+        <!-- Device & Access Restrictions Section -->
+        <div class="config-section">
+          <h3>Device & Access Restrictions</h3>
+          
+          <div class="form-group">
+            <label for="allowedDevices">Allowed Device Fingerprints (one per line)</label>
+            <textarea id="allowedDevices" name="allowedDevices" rows="3" placeholder="Leave blank to allow any device"></textarea>
+            <small>Restrict access to specific devices only</small>
+          </div>
+
+          <div class="form-group">
+            <label for="allowedEmails">Allowed Viewer Emails (one per line)</label>
+            <textarea id="allowedEmails" name="allowedEmails" rows="3" placeholder="viewer1@example.com&#10;viewer2@example.com"></textarea>
+            <small>Only users with these emails can access (requires authentication)</small>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+          <button type="button" class="btn btn-secondary" onclick="window.location.href='/dashboard.html'">Cancel</button>
+          <button type="submit" class="btn btn-primary">Generate Secure Share Link</button>
+        </div>
+      </form>
+
+      <!-- Share Link Display -->
+      <div id="shareLinkContainer" class="share-link-container">
+        <h3>✅ Secure Share Link Generated!</h3>
+        <p>Share this link with your viewers. All security policies will be enforced.</p>
+        <div class="share-link">
+          <input type="text" id="shareLinkInput" readonly>
+          <button class="btn-copy" onclick="copyShareLink()">Copy Link</button>
+        </div>
+        <p style="margin-top: 15px; font-size: 14px; color: #666;">
+          <strong>Note:</strong> Track views and violations in your dashboard.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/deviceFingerprint.js"></script>
+  <script>
+    let currentDocumentId = null;
+
+    // Get document ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const documentId = urlParams.get('id');
+
+    if (!documentId) {
+      showAlert('error', 'No document ID provided');
+      setTimeout(() => window.location.href = '/dashboard.html', 2000);
+    }
+
+    // Load document details
+    async function loadDocument() {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          window.location.href = '/login.html';
+          return;
+        }
+
+        const response = await fetch(`/api/documents/${documentId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to load document');
+        }
+
+        const data = await response.json();
+        const doc = data.document || data;
+        currentDocumentId = doc.documentId;
+
+        // Populate document info
+        document.getElementById('docTitle').textContent = doc.title;
+        document.getElementById('docFilename').textContent = doc.filename;
+        document.getElementById('docSize').textContent = formatFileSize(doc.size);
+        document.getElementById('docCreated').textContent = new Date(doc.createdAt).toLocaleString();
+
+        // Populate existing configuration if already configured
+        if (doc.permissions) {
+          document.getElementById('maxViews').value = doc.permissions.maxViews || -1;
+          if (doc.permissions.expiryDate) {
+            const date = new Date(doc.permissions.expiryDate);
+            document.getElementById('expiryDate').value = date.toISOString().slice(0, 16);
+          }
+          document.getElementById('sessionTimeLimit').value = doc.permissions.sessionTimeLimit || -1;
+          document.getElementById('requireCamera').checked = doc.permissions.requireCamera !== false;
+          document.getElementById('requireFaceMatch').checked = doc.permissions.requireFaceMatch || false;
+          document.getElementById('securityLevel').value = doc.permissions.securityLevel || 'MEDIUM';
+          document.getElementById('blockMultipleMonitors').checked = doc.permissions.blockMultipleMonitors || false;
+          document.getElementById('blockConcurrentSessions').checked = doc.permissions.blockConcurrentSessions !== false;
+          document.getElementById('maxViolations').value = doc.permissions.maxViolations || 3;
+          
+          if (doc.permissions.allowedTimeStart) {
+            document.getElementById('allowedTimeStart').value = doc.permissions.allowedTimeStart;
+          }
+          if (doc.permissions.allowedTimeEnd) {
+            document.getElementById('allowedTimeEnd').value = doc.permissions.allowedTimeEnd;
+          }
+          
+          if (doc.permissions.allowedDays && doc.permissions.allowedDays.length > 0) {
+            doc.permissions.allowedDays.forEach(day => {
+              const checkbox = document.getElementById(`day${day}`);
+              if (checkbox) checkbox.checked = true;
+            });
+          }
+        }
+
+        if (doc.watermark) {
+          document.getElementById('watermarkEnabled').checked = doc.watermark.visible.enabled !== false;
+          document.getElementById('watermarkText').value = doc.watermark.visible.text || '';
+          document.getElementById('watermarkPosition').value = doc.watermark.visible.position || 'diagonal';
+          document.getElementById('watermarkOpacity').value = doc.watermark.visible.opacity || 0.3;
+        }
+
+        // Show existing share link if available
+        if (doc.shareUrl) {
+          document.getElementById('shareLinkInput').value = doc.shareUrl;
+          document.getElementById('shareLinkContainer').classList.add('active');
+        }
+
+        document.getElementById('loadingDiv').style.display = 'none';
+        document.getElementById('configForm').style.display = 'block';
+
+      } catch (error) {
+        console.error('Error loading document:', error);
+        showAlert('error', 'Failed to load document: ' + error.message);
+        document.getElementById('loadingDiv').style.display = 'none';
+      }
+    }
+
+    // Handle form submission
+    document.getElementById('securityConfigForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      try {
+        const token = localStorage.getItem('token');
+        const formData = new FormData(e.target);
+        
+        // Collect allowed days
+        const allowedDays = Array.from(document.querySelectorAll('input[name="allowedDays"]:checked'))
+          .map(cb => parseInt(cb.value));
+
+        // Prepare configuration data
+        const config = {
+          permissions: {
+            maxViews: parseInt(formData.get('maxViews')),
+            expiryDate: formData.get('expiryDate') || null,
+            sessionTimeLimit: parseInt(formData.get('sessionTimeLimit')),
+            requireCamera: document.getElementById('requireCamera').checked,
+            requireFaceMatch: document.getElementById('requireFaceMatch').checked,
+            securityLevel: formData.get('securityLevel'),
+            blockMultipleMonitors: document.getElementById('blockMultipleMonitors').checked,
+            blockConcurrentSessions: document.getElementById('blockConcurrentSessions').checked,
+            maxViolations: parseInt(formData.get('maxViolations')),
+            allowedTimeStart: formData.get('allowedTimeStart') || null,
+            allowedTimeEnd: formData.get('allowedTimeEnd') || null,
+            allowedDays: allowedDays.length > 0 ? allowedDays : [],
+            allowedDevices: formData.get('allowedDevices')
+              ? formData.get('allowedDevices').split('\n').map(d => d.trim()).filter(d => d)
+              : [],
+            allowedEmails: formData.get('allowedEmails')
+              ? formData.get('allowedEmails').split('\n').map(e => e.trim()).filter(e => e)
+              : []
+          },
+          watermark: {
+            visible: {
+              enabled: document.getElementById('watermarkEnabled').checked,
+              text: formData.get('watermarkText'),
+              position: formData.get('watermarkPosition'),
+              opacity: parseFloat(formData.get('watermarkOpacity'))
+            }
+          }
+        };
+
+        const response = await fetch(`/api/documents/${currentDocumentId}/configure`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(config)
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to configure document');
+        }
+
+        const result = await response.json();
+        
+        // Display share link
+        document.getElementById('shareLinkInput').value = result.shareUrl;
+        document.getElementById('shareLinkContainer').classList.add('active');
+        
+        showAlert('success', 'Security configuration saved successfully!');
+        
+        // Scroll to share link
+        document.getElementById('shareLinkContainer').scrollIntoView({ behavior: 'smooth' });
+
+      } catch (error) {
+        console.error('Error configuring document:', error);
+        showAlert('error', 'Failed to save configuration: ' + error.message);
+      }
+    });
+
+    function copyShareLink() {
+      const input = document.getElementById('shareLinkInput');
+      input.select();
+      document.execCommand('copy');
+      
+      const btn = event.target;
+      btn.textContent = '✓ Copied!';
+      btn.style.background = '#2e7d32';
+      
+      setTimeout(() => {
+        btn.textContent = 'Copy Link';
+        btn.style.background = '#4caf50';
+      }, 2000);
+    }
+
+    function showAlert(type, message) {
+      const alertDiv = document.getElementById('alertDiv');
+      alertDiv.innerHTML = `
+        <div class="alert alert-${type === 'success' ? 'success' : 'error'}">
+          ${message}
+        </div>
+      `;
+      
+      setTimeout(() => {
+        alertDiv.innerHTML = '';
+      }, 5000);
+    }
+
+    function formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    }
+
+    // Logout handler
+    document.getElementById('logoutBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      localStorage.removeItem('token');
+      window.location.href = '/login.html';
+    });
+
+    // Load document on page load
+    loadDocument();
+  </script>
+</body>
+</html>

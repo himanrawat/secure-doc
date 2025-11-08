@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Secure Document Platform</title>
+  <link rel="stylesheet" href="/css/dashboard.css">
+  
+  <!-- Socket.IO -->
+  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+  
+  <!-- Chart.js for analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="logo">
+        <h2>🔒 SecureDoc</h2>
+      </div>
+      
+      <nav class="nav-menu">
+        <a href="#overview" class="nav-item active" data-section="overview">
+          <span class="icon">📊</span>
+          <span>Overview</span>
+        </a>
+        <a href="#documents" class="nav-item" data-section="documents">
+          <span class="icon">📄</span>
+          <span>Documents</span>
+        </a>
+        <a href="#sessions" class="nav-item" data-section="sessions">
+          <span class="icon">👥</span>
+          <span>Live Sessions</span>
+        </a>
+        <a href="#violations" class="nav-item" data-section="violations">
+          <span class="icon">⚠️</span>
+          <span>Violations</span>
+        </a>
+        <a href="#analytics" class="nav-item" data-section="analytics">
+          <span class="icon">📈</span>
+          <span>Analytics</span>
+        </a>
+        <a href="#upload" class="nav-item" data-section="upload">
+          <span class="icon">⬆️</span>
+          <span>Upload</span>
+        </a>
+      </nav>
+      
+      <div class="user-info">
+        <div class="user-avatar">👤</div>
+        <div class="user-details">
+          <div id="user-name">Loading...</div>
+          <div id="user-email" class="text-muted"></div>
+        </div>
+        <button id="logout-btn" class="btn-icon" title="Logout">🚪</button>
+      </div>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Overview Section -->
+      <section id="overview-section" class="content-section active">
+        <h1>Dashboard Overview</h1>
+        
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">📄</div>
+            <div class="stat-details">
+              <div class="stat-value" id="total-documents">0</div>
+              <div class="stat-label">Total Documents</div>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-details">
+              <div class="stat-value" id="active-sessions">0</div>
+              <div class="stat-label">Active Sessions</div>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon">⚠️</div>
+            <div class="stat-details">
+              <div class="stat-value" id="total-violations">0</div>
+              <div class="stat-label">Total Violations</div>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon">👁️</div>
+            <div class="stat-details">
+              <div class="stat-value" id="total-views">0</div>
+              <div class="stat-label">Total Views</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="charts-grid">
+          <div class="chart-card">
+            <h3>Violations Over Time</h3>
+            <canvas id="violations-chart"></canvas>
+          </div>
+          
+          <div class="chart-card">
+            <h3>Session Activity</h3>
+            <canvas id="activity-chart"></canvas>
+          </div>
+        </div>
+        
+        <div class="recent-activity">
+          <h3>Recent Activity</h3>
+          <div id="recent-activity-list" class="activity-list">
+            <div class="loading">Loading activity...</div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Documents Section -->
+      <section id="documents-section" class="content-section">
+        <h1>My Documents</h1>
+        
+        <div class="section-header">
+          <input type="text" id="document-search" placeholder="Search documents..." class="search-input">
+          <button id="refresh-documents" class="btn-secondary">🔄 Refresh</button>
+        </div>
+        
+        <div id="documents-list" class="documents-grid">
+          <div class="loading">Loading documents...</div>
+        </div>
+      </section>
+      
+      <!-- Sessions Section -->
+      <section id="sessions-section" class="content-section">
+        <h1>Live Viewing Sessions</h1>
+        
+        <div class="alert-info">
+          <strong>Real-time Monitoring:</strong> This page updates automatically as users view your documents.
+        </div>
+        
+        <div id="sessions-list" class="sessions-grid">
+          <div class="empty-state">No active sessions</div>
+        </div>
+      </section>
+      
+      <!-- Violations Section -->
+      <section id="violations-section" class="content-section">
+        <h1>Security Violations</h1>
+        
+        <div class="filters">
+          <select id="violation-type-filter" class="filter-select">
+            <option value="">All Types</option>
+            <option value="screenshot_attempt">Screenshot</option>
+            <option value="screen_recording_detected">Screen Recording</option>
+            <option value="devtools_opened">DevTools</option>
+            <option value="camera_obstruction">Camera Blocked</option>
+            <option value="face_mismatch">Face Mismatch</option>
+            <option value="multiple_persons_detected">Multiple Persons</option>
+          </select>
+          
+          <select id="violation-severity-filter" class="filter-select">
+            <option value="">All Severities</option>
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+          </select>
+          
+          <button id="export-violations" class="btn-secondary">📥 Export</button>
+        </div>
+        
+        <div id="violations-list" class="violations-table">
+          <div class="loading">Loading violations...</div>
+        </div>
+      </section>
+      
+      <!-- Analytics Section -->
+      <section id="analytics-section" class="content-section">
+        <h1>Analytics & Insights</h1>
+        
+        <div class="analytics-grid">
+          <div class="analytics-card">
+            <h3>Top Viewed Documents</h3>
+            <div id="top-documents" class="list-content">
+              <div class="loading">Loading...</div>
+            </div>
+          </div>
+          
+          <div class="analytics-card">
+            <h3>Violation Breakdown</h3>
+            <canvas id="violation-types-chart"></canvas>
+          </div>
+          
+          <div class="analytics-card">
+            <h3>Average Session Duration</h3>
+            <div id="avg-session-duration" class="metric-display">
+              <div class="loading">Loading...</div>
+            </div>
+          </div>
+          
+          <div class="analytics-card">
+            <h3>Security Score</h3>
+            <div id="security-score" class="score-display">
+              <div class="loading">Loading...</div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- Upload Section -->
+      <section id="upload-section" class="content-section">
+        <h1>Upload Secure Document</h1>
+        
+        <form id="upload-form" class="upload-form">
+          <div class="upload-area" id="upload-area">
+            <div class="upload-icon">📁</div>
+            <p>Drag & drop your document here</p>
+            <p class="text-muted">or</p>
+            <input type="file" id="file-input" accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg" hidden>
+            <button type="button" id="browse-btn" class="btn-primary">Browse Files</button>
+          </div>
+          
+          <div id="file-preview" class="file-preview hidden">
+            <div class="file-icon">📄</div>
+            <div class="file-info">
+              <div id="file-name"></div>
+              <div id="file-size" class="text-muted"></div>
+            </div>
+            <button type="button" id="remove-file" class="btn-icon">❌</button>
+          </div>
+          
+          <div class="form-section">
+            <h3>Document Details</h3>
+            <div class="form-group">
+              <label for="doc-title">Title *</label>
+              <input type="text" id="doc-title" required class="form-input">
+            </div>
+            
+            <div class="form-group">
+              <label for="doc-description">Description</label>
+              <textarea id="doc-description" rows="3" class="form-input"></textarea>
+            </div>
+          </div>
+          
+          <div class="form-section">
+            <h3>Security Settings</h3>
+            
+            <div class="form-group">
+              <label for="security-level">Security Level *</label>
+              <select id="security-level" required class="form-input">
+                <option value="LOW">Low - Basic protection</option>
+                <option value="MEDIUM" selected>Medium - Enhanced security</option>
+                <option value="HIGH">High - Advanced protection</option>
+                <option value="MAXIMUM">Maximum - Full surveillance</option>
+              </select>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label for="max-views">Max Views</label>
+                <input type="number" id="max-views" min="1" class="form-input" placeholder="Unlimited">
+              </div>
+              
+              <div class="form-group">
+                <label for="expiry-date">Expiry Date</label>
+                <input type="datetime-local" id="expiry-date" class="form-input">
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label>Security Features</label>
+              <div class="checkbox-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" id="block-screenshots" checked>
+                  Block Screenshots
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" id="block-printing" checked>
+                  Block Printing
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" id="block-copy-paste" checked>
+                  Block Copy/Paste
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" id="require-camera">
+                  Require Camera Verification
+                </label>
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-section">
+            <h3>Watermark</h3>
+            
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" id="watermark-enabled">
+                Enable Watermark
+              </label>
+            </div>
+            
+            <div id="watermark-options" class="watermark-options hidden">
+              <div class="form-group">
+                <label for="watermark-text">Watermark Text</label>
+                <input type="text" id="watermark-text" value="CONFIDENTIAL" class="form-input">
+              </div>
+              
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="watermark-position">Position</label>
+                  <select id="watermark-position" class="form-input">
+                    <option value="diagonal" selected>Diagonal</option>
+                    <option value="center">Center</option>
+                    <option value="corners">Corners</option>
+                    <option value="floating">Floating</option>
+                  </select>
+                </div>
+                
+                <div class="form-group">
+                  <label for="watermark-opacity">Opacity</label>
+                  <input type="range" id="watermark-opacity" min="0.1" max="1" step="0.1" value="0.3" class="form-range">
+                  <span id="opacity-value">0.3</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-actions">
+            <button type="submit" class="btn-primary btn-large">Upload Document</button>
+            <button type="button" id="reset-form" class="btn-secondary">Reset</button>
+          </div>
+        </form>
+      </section>
+    </main>
+  </div>
+  
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>

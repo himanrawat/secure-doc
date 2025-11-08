@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Secure Document Viewer</title>
+  <link rel="stylesheet" href="/css/viewer.css">
+  
+  <!-- Face-api.js -->
+  <script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.min.js"></script>
+  
+  <!-- Socket.IO -->
+  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+</head>
+<body>
+  <!-- Security Overlay (hidden by default) -->
+  <div id="security-overlay" class="security-overlay hidden">
+    <div class="overlay-content">
+      <h2>⚠️ Session Paused</h2>
+      <p>Please return to the document to continue viewing.</p>
+    </div>
+  </div>
+  
+  <!-- Violation Warning -->
+  <div id="violation-warning" class="violation-warning hidden">
+    <div class="warning-content">
+      <h3>⚠️ Security Violation Detected</h3>
+      <p id="violation-message"></p>
+      <p id="violation-count"></p>
+      <button id="acknowledge-btn" class="btn-primary">I Understand</button>
+    </div>
+  </div>
+  
+  <!-- Session Terminated Screen -->
+  <div id="terminated-screen" class="terminated-screen hidden">
+    <div class="terminated-content">
+      <h1>🚫 Session Terminated</h1>
+      <p id="termination-reason">Your viewing session has been terminated due to security violations.</p>
+      <p>Please contact the document owner for assistance.</p>
+    </div>
+  </div>
+  
+  <!-- Camera Verification Modal -->
+  <div id="camera-modal" class="modal">
+    <div class="modal-content">
+      <h2>📷 Camera Verification Required</h2>
+      <p>This document requires camera-based identity verification.</p>
+      <p>Please allow camera access and position your face clearly in the frame.</p>
+      
+      <video id="verification-video" autoplay playsinline></video>
+      
+      <div id="verification-status" class="status-pending">
+        <span class="spinner"></span>
+        <span>Verifying your identity...</span>
+      </div>
+      
+      <button id="start-verification" class="btn-primary">Start Verification</button>
+    </div>
+  </div>
+  
+  <!-- Main Viewer -->
+  <div id="viewer-container" class="viewer-container">
+    <!-- Header -->
+    <header class="viewer-header">
+      <div class="header-left">
+        <h1 id="document-title">Loading Document...</h1>
+        <span id="document-info" class="document-info"></span>
+      </div>
+      
+      <div class="header-right">
+        <div id="security-status" class="security-status">
+          <span class="status-indicator"></span>
+          <span class="status-text">Monitoring Active</span>
+        </div>
+        
+        <button id="end-session-btn" class="btn-secondary">End Session</button>
+      </div>
+    </header>
+    
+    <!-- Document Content -->
+    <main id="document-content" class="document-content">
+      <div class="loading-spinner">
+        <div class="spinner"></div>
+        <p>Loading secure document...</p>
+      </div>
+    </main>
+    
+    <!-- Camera Feed (Bottom-right corner) -->
+    <div id="camera-feed" class="camera-feed hidden">
+      <video id="camera-video" autoplay playsinline></video>
+      <div class="camera-status"></div>
+    </div>
+  </div>
+  
+  <!-- Scripts -->
+  <script src="/js/utils/deviceFingerprint.js"></script>
+  <script src="/js/utils/watermarkOverlay.js"></script>
+  
+  <!-- Security Modules -->
+  <script src="/js/security/screenshotDetector.js"></script>
+  <script src="/js/security/devToolsDetector.js"></script>
+  <script src="/js/security/focusLossDetector.js"></script>
+  <script src="/js/security/screenRecordingDetector.js"></script>
+  <script src="/js/security/screenSharingDetector.js"></script>
+  <script src="/js/security/copyPasteDetector.js"></script>
+  <script src="/js/security/printDetector.js"></script>
+  <script src="/js/security/contextMenuDetector.js"></script>
+  <script src="/js/security/multiMonitorDetector.js"></script>
+  <script src="/js/security/tabSwitchDetector.js"></script>
+  <script src="/js/security/domIntegrityDetector.js"></script>
+  <script src="/js/security/extensionDetector.js"></script>
+  <script src="/js/security/securityManager.js"></script>
+  
+  <!-- Camera Monitoring -->
+  <script src="/js/camera/cameraMonitor.js"></script>
+  
+  <!-- Main Viewer Script -->
+  <script src="/js/viewer.js"></script>
+</body>
+</html>
